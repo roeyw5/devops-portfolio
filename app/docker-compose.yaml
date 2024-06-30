@@ -1,0 +1,34 @@
+services:
+  weather:
+    build: .
+    image: weather_app:latest
+    container_name: weather
+    environment:
+      - MONGO_URI=mongodb://root:rootpassword@mongodb:27017/locations
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:7.0.9
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_DATABASE: locations
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    ports:
+      - 80:80
+    depends_on:
+      - weather
+
+volumes:
+  mongo-data:

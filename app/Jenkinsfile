@@ -1,0 +1,181 @@
+/* This Jenkins pipeline builds, tests, versions, tags, and publishes a Dockerized weather app,
+ * then updates the GitOps repository with the new version into the chart.yaml.
+ */
+
+pipeline{
+    agent any
+
+    options {
+        timeout(time: 10, unit: 'MINUTES')
+        timestamps() 
+    }
+
+    environment {	
+        GIT_CREDENTIALS_ID = 'gitlab_ted'
+		ECR_REGISTRY = '644435390668.dkr.ecr.ap-south-1.amazonaws.com/roey-portfolio'
+		APP_IMAGE = 'weather_app:latest'
+    }
+
+
+
+    stages {
+		stage('Unit Test') {
+            steps {
+                script {
+                    sh "python3 ./src/test.py"
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    sh "docker build --no-cache -t ${APP_IMAGE} -f Dockerfile ."
+                }
+            }
+        }
+
+        stage('E2E tests') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'feature/*'
+                }
+            }
+            steps {
+                script {
+                    sh "docker compose up -d"
+                    healthCheck()
+                    sh "docker compose down"
+                }
+            }
+        }
+
+        // Versioning stage for tagging the latest version
+        stage('Versioning') {
+            when { branch 'main' }
+            steps {
+                withCredentials([gitUsernamePassword(credentialsId: GIT_CREDENTIALS_ID)]) {
+                    sh "git fetch --tags"
+                }
+                script {
+                    // Get the latest version tag and increment it
+                    def latestVersion = sh(returnStdout: true, script: "git tag -l | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+\$' | sort -V | tail -n 1").trim()
+                    echo "Latest version found: ${latestVersion}"
+                    if (latestVersion == '') {
+                        env.TAG = "1.0.0"
+                    } else {
+                        def (major, minor, patch) = latestVersion.tokenize('.').collect { it.toInteger() }
+                        env.TAG = "${major}.${minor}.${patch + 1}"
+                        echo "Incremented version: ${env.TAG}"
+                    }
+                }
+            }
+        }
+
+        // Tag and pushe the image to ECR, & add the tag to the repo
+		stage ('Tag & Publish') {
+            when { branch 'main' }
+            steps {
+                script {
+                    awsEcrLogin()
+                    sh """
+                    docker tag ${env.APP_IMAGE} ${env.ECR_REGISTRY}:${env.TAG}
+                    docker push ${env.ECR_REGISTRY}:${env.TAG}
+                    """
+
+                    withCredentials([gitUsernamePassword(credentialsId: GIT_CREDENTIALS_ID)]) {
+                        def tagExists = sh(returnStatus: true, script: "git ls-remote --tags origin | grep -q refs/tags/${env.TAG}") == 0
+                        if (!tagExists) {
+                            sh """
+                            git clean -f
+                            git tag ${env.TAG}
+                            git push origin ${env.TAG}
+                            """
+                        } 
+                        else {echo "Tag ${env.TAG} already exists, skipping tagging."}
+                    }
+                }
+            }
+        }
+        
+        // Update image tag in GitOps configuration repo
+        stage('Update GitOps') {
+            when { branch 'main' }
+            steps {
+                script {
+                    withCredentials([gitUsernamePassword(credentialsId: GIT_CREDENTIALS_ID)]) {
+                        sh """
+                            git clone https://gitlab.com/roeyw/portf_gitops.git
+                            cd portf_gitops
+
+                            # Update Chart.yaml with new app version
+                            sed -i 's/tag: .*/tag: "${env.TAG}"/' ./weather-app/values.yaml
+
+                            git config user.email "jenkins@roey.com"
+                            git config user.name "Jenkins"
+
+                            # Commit and push changes
+                            git add ./weather-app/values.yaml
+                            git commit -m "Updating version: ${env.TAG}"
+                            git push origin main
+                        """
+                    }
+                } 
+            }
+        }
+    }
+	
+    post {
+		always {
+            sh "docker compose down"
+			cleanWs()
+		}
+		success {
+			echo "Pipeline completed successfully."
+		}
+		failure {
+            emailext(
+                recipientProviders: [culprits()],
+                subject: 'Build failure',
+                body: 'Build failure.',
+                attachLog: true,
+                compressLog: true
+            )
+        }
+	}
+}
+
+
+// Helper methods
+
+/**
+ * Logs into the ECR
+ */
+def awsEcrLogin() {
+    sh "aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${env.ECR_REGISTRY}"
+}
+
+/**
+ * Health check for nginx.
+ */
+def healthCheck() {
+    def MAX_ATTEMPTS = 2
+    def SLEEP_TIME = 5
+    def ATTEMPTS = 0
+
+    while (ATTEMPTS < MAX_ATTEMPTS) {
+        def status = sh(script: "curl --fail -s http://nginx/static", returnStatus: true)
+
+        if (status == 0) {
+            echo "Nginx is healthy and serving the weather app."
+            return true
+        } else {
+            echo "Waiting for nginx to be healthy... Attempt ${ATTEMPTS + 1}, curl exit status: ${status}"
+            sleep SLEEP_TIME
+            ATTEMPTS++
+        }
+    }
+
+    return true
+}

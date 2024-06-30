@@ -1,0 +1,42 @@
+config:
+  logLevel: trace
+  service: |
+    [SERVICE]
+        Daemon Off
+        Flush 5
+        Log_Level debug
+        Parsers_File /fluent-bit/etc/parsers.conf
+        Parsers_File /fluent-bit/etc/conf/custom_parsers.conf
+        HTTP_Server On
+        HTTP_Listen 0.0.0.0
+        HTTP_Port 2020
+        Health_Check On
+        Trace_Error On
+
+  ## https://docs.fluentbit.io/manual/pipeline/inputs
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*weather*.log
+        Tag kube.*
+        Parser docker
+        Mem_Buf_Limit 50MB
+        Skip_Long_Lines On
+
+  ## https://docs.fluentbit.io/manual/pipeline/outputs
+  outputs: |
+    [OUTPUT]
+        Name es
+        Match *weather*
+        Index fluent-bit
+        Type  _doc
+        Host elasticsearch.efk.svc.cluster.local
+        Port 9200
+        HTTP_User elastic
+        HTTP_Passwd 9sRLSqZOhtUpSpyn
+        tls On
+        tls.verify Off
+        Logstash_Format On
+        Logstash_Prefix logstash
+        Retry_Limit False
+        Suppress_Type_Name On

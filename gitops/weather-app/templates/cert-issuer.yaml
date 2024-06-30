@@ -1,0 +1,15 @@
+# Production ClusterIssuer for Let's Encrypt
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{.Values.certIssuer.secretName}}
+spec:
+  acme:
+    server: {{.Values.certIssuer.server}}
+    email: {{.Values.certIssuer.email}}
+    privateKeySecretRef:
+      name: {{.Values.certIssuer.secretName}}
+    solvers:
+      - http01:
+          ingress:
+            class: {{.Values.ingress.class}}

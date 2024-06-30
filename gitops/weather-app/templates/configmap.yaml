@@ -1,0 +1,9 @@
+# ConfigMap containing non-sensitive configuration data for MongoDB.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Values.configmap.name}}
+  namespace: {{.Values.appNamespace}}
+data:
+  LOG_LEVEL: {{.Values.configmap.data.logLevel | quote}}
+  PERSISTENCE: {{.Values.configmap.data.persistence | quote}}

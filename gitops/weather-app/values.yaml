@@ -1,0 +1,86 @@
+## Default configuration values for the application & its dependencies
+
+# General application
+appName: weather-app
+appNamespace: app
+
+# Deployment
+deployment:
+  replicas: 1
+  image:
+    name: 644435390668.dkr.ecr.ap-south-1.amazonaws.com/roey-portfolio
+    tag: "1.0.57"
+  imagePullPolicy: Always
+  resources:
+    requests:
+      cpu: "0.1"
+      memory: "128Mi"
+    limits:
+      cpu: "0.2"
+      memory: "256Mi"
+  probe:
+    path: /ready
+  mongodb:
+    password: mongodb-passwords
+    uri: "mongodb://$(MONGO_USER):$(MONGO_PASS)@weather-app-mongodb-headless.app.svc.cluster.local/$(MONGO_DB)?replicaSet=rs0"
+  api:
+    existingSecret: roey-pf-secret
+
+# Service
+service:
+  name: weather-service
+  type: ClusterIP
+  ports:
+    serviceProtocol: TCP
+    servicePort: 80
+    appPort: 5000
+
+# ConfigMap 
+configmap:
+  name: mongo-conf
+  data:
+    logLevel: "info"
+    persistence: "true"
+
+# Ingress 
+ingress:
+  name: app-ingress
+  class: nginx
+  host: roey-pf.ddnsking.com
+  tlsSecretName: app-tls
+
+# Certificate issuer for Let's Encrypt
+certIssuer:
+  email: roey.wullman@gmail.com
+  secretName: letsencrypt-production
+  server: https://acme-v02.api.letsencrypt.org/directory
+
+# MongoDB 
+mongodb:
+  architecture: replicaset
+  replicaCount: 3
+  persistence:
+    enabled: true
+    size: "8Gi"
+    storageClass: "gp3"
+    accessModes:
+      - ReadWriteOnce
+  auth:
+    enabled: true
+    usernames: ["roey"]
+    databases: ["locations"]
+    existingSecret: roey-pf-secret
+  resources:
+    requests:
+      cpu: "0.1"
+      memory: "128Mi"
+    limits:
+      cpu: "0.2"
+      memory: "256Mi"
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+  headlessServiceName: mongodb-headless
+  arbiter:
+    enabled: false

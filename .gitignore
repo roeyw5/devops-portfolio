@@ -1,0 +1,112 @@
+# Python-related
+*.pyc
+*.pyo
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller
+**/*.manifest
+**/*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Flask stuff
+instance/
+.webassets-cache
+*.log
+
+# Environment files
+# .env
+.env.*
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# VS Code
+.vscode/
+.settings.json
+
+# PyCharm
+.idea/
+
+# Linux
+*.swp
+*~
+
+# OS-generated files #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor directories and files #
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore all .git directories #
+**/.git/
+
+# Ignore practice directories
+.practice/
+*.tar.gz
+
+# Local .terraform directories
+.terraform/
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+terraform.tfstate.d/
+
+# Crash log files
+crash.log
+
+# Exclude all .tfvars files, which might contain sensitive data, such as
+# passwords, private keys, and other secrets. These should not be part of version
+# control as they can pose a security risk.
+*.tfvars
+
+# Ignore override files as they are usually used to override resources locally and
+# so should not be shared with others in version control
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore any .terraform.lock.hcl files which contain provider versions
+.terraform.lock.hcl
+
+# Logs
+*.log
+
+private_notes.md

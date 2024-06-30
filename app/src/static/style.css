@@ -1,0 +1,46 @@
+body {
+    background-color: #181818;
+    color: #f8f9fa;
+    padding-left: 250px; /* Adjusted to the width of the sidebar */
+}
+.center-content {
+    display: flex;
+    align-items: center;
+    margin-left: 250px; /* Adjusted to the width of the sidebar */
+    padding: 20px;
+}
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+    background-color: #202020; /* Slightly different shade to distinguish the sidebar */
+}
+.content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.location-container {
+    text-align: center;
+    margin-top: 20px;
+}
+.table-header-row {
+    background-color: #f0f0f0; /* Gray background color for the table header row */
+}
+.btn-link {
+    color: yellow;
+    padding: 0;
+    text-decoration: none;
+}

@@ -1,0 +1,28 @@
+
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: weather-app
+        honor_labels: true
+        scrape_interval: 1m
+        scrape_timeout: 30s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+          - targets:
+              - roey-pf.ddnsking.com
+
+grafana:
+  enabled: true
+  persistence:
+    enabled: true
+    type: sts
+    storageClassName: "gp3"
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
+
+crds:
+  enabled: true

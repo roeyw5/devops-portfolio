@@ -1,0 +1,109 @@
+# Deployment configuration for the Weather application, ensuring replicas of the app container.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.appName}}
+  labels:
+    app: {{.Values.appName}}
+spec:
+  replicas: {{.Values.deployment.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.appName}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.appName}}
+    spec:
+      containers:
+        - name: {{.Values.appName}}
+          image: "{{.Values.deployment.image.name}}:{{.Values.deployment.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{.Values.deployment.imagePullPolicy}}
+          ports:
+            - containerPort: {{.Values.service.ports.appPort}}
+          env:
+            - name: MONGO_USER
+              value: {{index .Values.mongodb.auth.usernames 0}}
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.mongodb.auth.existingSecret}}
+                  key: {{.Values.deployment.mongodb.password}}
+            - name: MONGO_DB
+              value: {{index .Values.mongodb.auth.databases 0}}
+            - name: MONGO_URI
+              value: {{.Values.deployment.mongodb.uri}}
+            - name: WEATHER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.deployment.api.existingSecret}}
+                  key: WEATHER_API_KEY
+            - name: WEATHER_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.deployment.api.existingSecret}}
+                  key: WEATHER_API_URL
+          envFrom:
+            - configMapRef:
+                name: {{.Values.configmap.name}}
+          resources:
+            requests:
+              cpu: {{.Values.deployment.resources.requests.cpu}}
+              memory: {{.Values.deployment.resources.requests.memory}}
+            limits:
+              cpu: {{.Values.deployment.resources.limits.cpu}}
+              memory: {{.Values.deployment.resources.limits.memory}}
+          readinessProbe:
+            httpGet:
+              path: {{.Values.deployment.probe.path}}
+              port: {{.Values.service.ports.appPort}}
+              scheme: HTTP
+# SWAP TO THIS SHORTER VERSION WHEN EVERYTHING WORKS
+
+# # Deployment configuration for the Weather application, ensuring replicas of the app container.
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: {{.Values.appName}}
+#   labels:
+#     app: {{.Values.appName}}
+# spec:
+#   replicas: {{.Values.deployment.replicas}}
+#   selector:
+#     matchLabels:
+#       app: {{.Values.appName}}
+#   template:
+#     metadata:
+#       labels:
+#         app: {{.Values.appName}}
+#     spec:
+#       containers:
+#         - name: {{.Values.appName}}
+#           image: "{{.Values.deployment.image.name}}:{{.Values.deployment.image.tag | default .Chart.AppVersion }}"
+#           imagePullPolicy: {{.Values.deployment.imagePullPolicy}}
+#           ports:
+#             - containerPort: {{.Values.service.ports.appPort}}
+#           env:
+#             - name: MONGO_USER
+#               value: {{index .Values.mongodb.auth.usernames 0}}
+#             - name: MONGO_DB
+#               value: {{index .Values.mongodb.auth.databases 0}}
+#             - name: MONGO_URI
+#               value: {{.Values.deployment.mongodb.uri}}
+#           envFrom:
+#             - secretRef:
+#                 name: {{.Values.mongodb.auth.existingSecret}}
+#             - configMapRef:
+#                 name: {{.Values.configmap.name}}
+#           resources:
+#             requests:
+#               cpu: {{.Values.deployment.resources.requests.cpu}}
+#               memory: {{.Values.deployment.resources.requests.memory}}
+#             limits:
+#               cpu: {{.Values.deployment.resources.limits.cpu}}
+#               memory: {{.Values.deployment.resources.limits.memory}}
+#           readinessProbe:
+#             httpGet:
+#               path: {{.Values.deployment.probe.path}}
+#               port: {{.Values.service.ports.appPort}}
+#               scheme: HTTP
