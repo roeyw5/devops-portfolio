@@ -18,59 +18,23 @@ The project follows a microservice-based architecture deployed on AWS using EKS 
 
 ## Technology Stack
 
-### Development
-
-- **Language**: Python (Flask)
-- **API**: REST
-
-### Containerization
-
-- **Docker**
-
-### Source Code Management
-
-- **Gitlab**
-
-### CI/CD
-
-- **Jenkins**
-
-### Database
-
-- **MongoDB**
-
-### Infrastructure as Code
-
-- **Terraform**
-
-### Cloud Provider
-
-- **AWS**
-
-### Kubernetes
-
-- **EKS**
-- **Helm**
-
-### Ingress
-
-- **Nginx Ingress Controller**
-
-### GitOps
-
-- **Argo CD**
-
-### Logging
-
-- **EFK Stack**
-
-### Monitoring
-
-- **Prometheus and Grafana**
+- **Terraform:** For provisioning and managing infrastructure as code.
+- **AWS:** For hosting the infrastructure, including VPC, EC2, EKS, ECR, S3, IAM, Secrets and related services.
+- **Kubernetes:** For orchestrating containerized applications.
+- **Helm:** For managing Kubernetes applications using Helm charts.
+- **ArgoCD:** For implementing GitOps-based continuous deployment.
+- **GitLab:** For version control and CI/CD pipeline management.
+- **Python (Flask):** For development, including building REST APIs.
+- **Docker:** For containerizing applications.
+- **Jenkins:** For continuous integration and deployment pipelines.
+- **MongoDB:** For database management.
+- **Nginx Ingress Controller:** For managing inbound traffic to the Kubernetes cluster.
+- **EFK Stack:** For centralized logging using Elasticsearch, Fluentd, and Kibana.
+- **Prometheus and Grafana:** For monitoring and observability of the infrastructure and applications.
 
 ## Documentation
 
-Each repository includes a `README.md` file with detailed documentation about its purpose, setup, and usage instructions.
+Each repository includes a `README.md` file with detailed documentation about its purpose, setup, and detailed structure.
 
 ## Contact
 
