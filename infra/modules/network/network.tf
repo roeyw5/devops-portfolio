@@ -43,8 +43,6 @@ resource "aws_eip" "nat_eip" {
   count  = length(var.availability_zones)
   domain = "vpc"
   tags   = merge(var.tags, { Name = "${var.project_name}-eip-${count.index}" })
-
-  depends_on = [aws_internet_gateway.igw]
 }
 
 # NAT Gateway

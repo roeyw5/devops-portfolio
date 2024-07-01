@@ -38,22 +38,23 @@ module "network" {
 
 # Module for creating the EKS cluster and node group
 module "compute" {
-  source          = "./modules/compute"
-  cluster_name    = var.cluster_name
-  subnet_ids      = module.network.subnet_ids
-  instance_type   = var.instance_type
-  scaling_desired = var.scaling_desired
-  scaling_min     = var.scaling_min
-  scaling_max     = var.scaling_max
-  ami_id          = var.ami_id
-  tags            = var.tags
-  key_pair_name   = var.key_pair_name
-  vpc_id          = module.network.vpc_id
-  account_id      = var.account_id
-  region          = var.region
-  project_name    = var.project_name
-  disk_size       = var.disk_size
-  capacity_type   = var.capacity_type
-  max_unavailable = var.max_unavailable
+  source             = "./modules/compute"
+  cluster_name       = var.cluster_name
+  private_subnet_ids = module.network.private_subnet_ids
+  public_subnet_ids  = module.network.public_subnet_ids
+  instance_type      = var.instance_type
+  scaling_desired    = var.scaling_desired
+  scaling_min        = var.scaling_min
+  scaling_max        = var.scaling_max
+  ami_id             = var.ami_id
+  tags               = var.tags
+  key_pair_name      = var.key_pair_name
+  vpc_id             = module.network.vpc_id
+  account_id         = var.account_id
+  region             = var.region
+  project_name       = var.project_name
+  disk_size          = var.disk_size
+  capacity_type      = var.capacity_type
+  max_unavailable    = var.max_unavailable
 }
 

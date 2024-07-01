@@ -18,7 +18,10 @@ variable "key_pair_name" {
 variable "vpc_id" {
   type = string
 }
-variable "subnet_ids" {
+variable "private_subnet_ids" {
+  type = list(string)
+}
+variable "public_subnet_ids" {
   type = list(string)
 }
 variable "cluster_name" {
